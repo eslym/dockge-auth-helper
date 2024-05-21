@@ -46,10 +46,11 @@ services:
       - /opt/dockge/docker-auth.json:/opt/dockge/docker-auth.json
     environment:
       AUTH_TOKENS: |
-        # list urls with credentials here
-        # index.docker.io/v1 is default for docker login
-        https://<your username>:<your token>@index.docker.io/v1/
-        https://<your username>:<your token>@other.private-repo.com/
+        # list docker credentials here, format <entry>=<username>:<token>
+        # use @ for default docker registry (docker.io)
+        @=<your username>:<your token>
+        other.private-repo.com=<your username>:<your token>
+        127.0.0.1:8000=<your username>:<your token>
     #   AUTH_SECRET: my-secret
       # or read from secret which pointless for now
       # since dockge not yet support secret management

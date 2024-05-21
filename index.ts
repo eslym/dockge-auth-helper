@@ -12,23 +12,16 @@ if (env.AUTH_SECRET) {
   process.exit(1);
 }
 
-const scanLine = /^(.+)$/gm;
+const scanVal = /^([^=#\s]+)\s*=\s*([^:]*:.*)\s*(?:#|$)/gm;
 
-let line: RegExpExecArray | null = null;
+let scan: RegExpExecArray | null = null;
 const auths: Record<string, { auth: string }> = {};
 
-while ((line = scanLine.exec(src))) {
-  if (!URL.canParse(line[1])) continue;
-  const entry = line[1].match(/^[a-z][a-z0-9.+]*:\/\//i)
-    ? line[1]
-    : `https://${line[1]}`;
-  const url = new URL(entry);
-  const auth = btoa(
-    `${decodeURIComponent(url.username)}:${decodeURIComponent(url.password)}`
-  );
-  url.username = url.password = "";
-  log(`found auth for ${url.toString()}.`);
-  auths[url.toString()] = { auth };
+while ((scan = scanVal.exec(src))) {
+  let [, entry, cred] = scan;
+  if (entry === "@") entry = "https://index.docker.io/v1/";
+  log(`found ${entry}`);
+  auths[entry] = { auth: btoa(cred) };
 }
 
 const outfile = env.OUTPUT_FILE || "docker-auths.json";

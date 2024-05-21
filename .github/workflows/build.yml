@@ -18,6 +18,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - uses: docker/build-push-action@v5
         with:
+          context: .
           push: true
           tags: eslym/dockge-auth-helper:latest
           platforms: linux/amd64,linux/arm64

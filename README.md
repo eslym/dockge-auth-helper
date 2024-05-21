@@ -15,7 +15,7 @@ A helper to set `.docker/config.json` for dockge to authenticate for private rep
 
 ```shell
 # use /opt/dockge as example here
-echo '{}' > /opt/dockge/docker-auths.json
+echo '{}' > /opt/dockge/docker-auth.json
 ```
 
 ### 2. mount the config file into dockge container as `/root/.docker/config.json`
@@ -28,7 +28,7 @@ services:
     ...
     volumes:
       # add this line
-      - ./docker-auths.json:/root/.docker/config.json
+      - ./docker-auth.json:/root/.docker/config.json
     ...
 ```
 
@@ -36,17 +36,21 @@ services:
 
 ```yaml
 services:
-  image: eslym/dockge-auth-helper:latest
-  # only run when you need to update the config
-  restart: no
-  volumes:
-    # the default path for output, can specified via env OUTPUT_FILE
-    /opt/dockge/docker-auths.json:/home/bun/app/docker-auths.json
-  environment:
-    AUTH_TOKENS: |-
-      # list urls with credentials here
-      # index.docker.io/v1 is default for docker login
-      https://<your username>:<your token>@index.docker.io/v1/
-      https://<your username>:<your token>@other.private-repo.com/
-    # AUTH_SECRET: my-secret # or read from secret which pointless for now since dockge not yet support secret management
+  helper:
+    image: eslym/dockge-auth-helper:latest
+    # only run when you need to update the config
+    restart: no
+    volumes:
+      # the default path for output, can specified via env OUTPUT_FILE
+      # the source must be full path on host
+      - /opt/dockge/docker-auth.json:/opt/dockge/docker-auth.json
+    environment:
+      AUTH_TOKENS: |
+        # list urls with credentials here
+        # index.docker.io/v1 is default for docker login
+        https://<your username>:<your token>@index.docker.io/v1/
+        https://<your username>:<your token>@other.private-repo.com/
+    #   AUTH_SECRET: my-secret
+      # or read from secret which pointless for now
+      # since dockge not yet support secret management
 ```
